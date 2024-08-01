@@ -44,7 +44,7 @@ func (u *OrderUsecase) Add(input *request.OrderRequest) (*domain.Order, error) {
 		return nil, err
 	}
 
-	err = u.ticketRepository.DeductQuantity(ticketDetail.ID, input.Quantity)
+	_, err = u.ticketRepository.DeductQuantity(ticketDetail.ID, input.Quantity)
 	if err != nil {
 		return nil, err
 	}

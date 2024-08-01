@@ -29,7 +29,7 @@ func (app *application) routes() *gin.Engine {
 
 	r.GET("/api/tickets", app.handlers.Tickets.GetAll)
 	r.GET("/api/tickets/:id", app.handlers.Tickets.GetByID)
-	r.PATCH("/api/tickets/:id/quantities", app.handlers.Tickets.AddQuantity) // Intended solely for concurrency testing purpose
+	r.PATCH("/api/tickets/:id/quantities", app.handlers.Tickets.UpdateQuantity) // Intended solely for concurrency testing purpose
 
 	r.GET("/api/orders", app.handlers.Orders.GetAll)
 	r.POST("/api/orders", app.handlers.Orders.Add)

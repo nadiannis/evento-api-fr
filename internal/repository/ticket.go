@@ -251,40 +251,40 @@ func (r *TicketRepository) AddQuantity(ticketID int64, quantity int) (*domain.Ti
 	return &ticket, nil
 }
 
-func (r *TicketRepository) DeductQuantity(ticketID int64, quantity int) error {
+func (r *TicketRepository) DeductQuantity(ticketID int64, quantity int) (*domain.Ticket, error) {
 	query := `
 		UPDATE tickets
 		SET quantity = quantity - $1
 		WHERE id = $2
+		RETURNING id, event_id, ticket_type_id, quantity
 	`
+
+	var ticket domain.Ticket
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer stmt.Close()
 
-	result, err := stmt.ExecContext(ctx, quantity, ticketID)
+	err = stmt.QueryRowContext(ctx, quantity, ticketID).Scan(
+		&ticket.ID,
+		&ticket.EventID,
+		&ticket.TicketTypeID,
+		&ticket.Quantity,
+	)
+
 	if err != nil {
 		switch {
 		case err.Error() == `ERROR: new row for relation "tickets" violates check constraint "tickets_quantity_check" (SQLSTATE 23514)`:
-			return utils.ErrInsufficientTicketQuantity
+			return nil, utils.ErrInsufficientTicketQuantity
 		default:
-			return err
+			return nil, err
 		}
 	}
 
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-
-	if rowsAffected == 0 {
-		return utils.ErrTicketNotFound
-	}
-
-	return nil
+	return &ticket, nil
 }

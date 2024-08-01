@@ -55,7 +55,7 @@ type TicketReader interface {
 
 type TicketWriter interface {
 	Add(input *request.TicketRequest) (*domain.Ticket, error)
-	AddQuantity(ticketID int64, input *request.TicketQuantityRequest) (*domain.Ticket, error)
+	UpdateQuantity(ticketID int64, input *request.TicketQuantityRequest) (*domain.Ticket, error)
 }
 
 type ITicketUsecase interface {

@@ -55,7 +55,7 @@ type TicketReader interface {
 type TicketWriter interface {
 	Add(ticket *domain.Ticket) error
 	AddQuantity(ticketID int64, quantity int) (*domain.Ticket, error)
-	DeductQuantity(ticketID int64, quantity int) error
+	DeductQuantity(ticketID int64, quantity int) (*domain.Ticket, error)
 }
 
 type ITicketRepository interface {

@@ -64,7 +64,7 @@ func (h *TicketHandler) GetByID(c *gin.Context) {
 	utils.WriteJSON(c, http.StatusOK, res)
 }
 
-func (h *TicketHandler) AddQuantity(c *gin.Context) {
+func (h *TicketHandler) UpdateQuantity(c *gin.Context) {
 	id, err := utils.ReadIDParam(c)
 	if err != nil {
 		utils.BadRequestResponse(c, utils.ErrInvalidID)
@@ -81,6 +81,8 @@ func (h *TicketHandler) AddQuantity(c *gin.Context) {
 
 	v := utils.NewValidator()
 
+	v.Check(input.Action != "", "action", "action is required")
+	v.Check(utils.PermittedValue(input.Action, request.ActionAdd, request.ActionDeduct), "action", "action should be 'add' or 'deduct'")
 	v.Check(input.Quantity != 0, "quantity", "quantity is required")
 	v.Check(input.Quantity > 0, "quantity", "quantity should not be a negative number")
 
@@ -89,11 +91,13 @@ func (h *TicketHandler) AddQuantity(c *gin.Context) {
 		return
 	}
 
-	ticket, err := h.usecase.AddQuantity(id, &input)
+	ticket, err := h.usecase.UpdateQuantity(id, &input)
 	if err != nil {
 		switch {
 		case errors.Is(err, utils.ErrTicketNotFound):
 			utils.NotFoundResponse(c, err)
+		case errors.Is(err, utils.ErrInsufficientTicketQuantity):
+			utils.BadRequestResponse(c, err)
 		default:
 			utils.ServerErrorResponse(c, err)
 		}
@@ -102,7 +106,7 @@ func (h *TicketHandler) AddQuantity(c *gin.Context) {
 
 	res := response.SuccessResponse{
 		Status:  response.Success,
-		Message: "ticket quantity added successfully",
+		Message: "ticket quantity updated successfully",
 		Data:    ticket,
 	}
 

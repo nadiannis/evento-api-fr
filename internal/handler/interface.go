@@ -34,7 +34,7 @@ type TicketReader interface {
 }
 
 type TicketWriter interface {
-	AddQuantity(c *gin.Context)
+	UpdateQuantity(c *gin.Context)
 }
 
 type ITicketHandler interface {

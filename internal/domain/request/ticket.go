@@ -9,5 +9,6 @@ type TicketRequest struct {
 }
 
 type TicketQuantityRequest struct {
-	Quantity int `json:"quantity"`
+	Action   UpdateNumberAction `json:"action"`
+	Quantity int                `json:"quantity"`
 }
