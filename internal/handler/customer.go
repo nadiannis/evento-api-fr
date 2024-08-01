@@ -3,7 +3,6 @@ package handler
 import (
 	"errors"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -81,14 +80,13 @@ func (h *CustomerHandler) Add(c *gin.Context) {
 }
 
 func (h *CustomerHandler) GetByID(c *gin.Context) {
-	id := c.Param("id")
-	customerID, err := strconv.ParseInt(id, 10, 64)
+	id, err := utils.ReadIDParam(c)
 	if err != nil {
 		utils.BadRequestResponse(c, utils.ErrInvalidID)
 		return
 	}
 
-	customer, err := h.usecase.GetByID(customerID)
+	customer, err := h.usecase.GetByID(id)
 	if err != nil {
 		switch {
 		case errors.Is(err, utils.ErrCustomerNotFound):
@@ -109,8 +107,7 @@ func (h *CustomerHandler) GetByID(c *gin.Context) {
 }
 
 func (h *CustomerHandler) AddBalance(c *gin.Context) {
-	id := c.Param("id")
-	customerID, err := strconv.ParseInt(id, 10, 64)
+	id, err := utils.ReadIDParam(c)
 	if err != nil {
 		utils.BadRequestResponse(c, utils.ErrInvalidID)
 		return
@@ -134,7 +131,7 @@ func (h *CustomerHandler) AddBalance(c *gin.Context) {
 		return
 	}
 
-	customer, err := h.usecase.AddBalance(customerID, &input)
+	customer, err := h.usecase.AddBalance(id, &input)
 	if err != nil {
 		switch {
 		case errors.Is(err, utils.ErrCustomerNotFound):

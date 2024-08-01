@@ -3,7 +3,6 @@ package handler
 import (
 	"errors"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/nadiannis/evento-api-fr/internal/domain/request"
@@ -39,14 +38,13 @@ func (h *TicketHandler) GetAll(c *gin.Context) {
 }
 
 func (h *TicketHandler) GetByID(c *gin.Context) {
-	id := c.Param("id")
-	ticketID, err := strconv.ParseInt(id, 10, 64)
+	id, err := utils.ReadIDParam(c)
 	if err != nil {
 		utils.BadRequestResponse(c, utils.ErrInvalidID)
 		return
 	}
 
-	ticket, err := h.usecase.GetByID(ticketID)
+	ticket, err := h.usecase.GetByID(id)
 	if err != nil {
 		switch {
 		case errors.Is(err, utils.ErrTicketNotFound):
@@ -67,8 +65,7 @@ func (h *TicketHandler) GetByID(c *gin.Context) {
 }
 
 func (h *TicketHandler) AddQuantity(c *gin.Context) {
-	id := c.Param("id")
-	ticketID, err := strconv.ParseInt(id, 10, 64)
+	id, err := utils.ReadIDParam(c)
 	if err != nil {
 		utils.BadRequestResponse(c, utils.ErrInvalidID)
 		return
@@ -92,7 +89,7 @@ func (h *TicketHandler) AddQuantity(c *gin.Context) {
 		return
 	}
 
-	ticket, err := h.usecase.AddQuantity(ticketID, &input)
+	ticket, err := h.usecase.AddQuantity(id, &input)
 	if err != nil {
 		switch {
 		case errors.Is(err, utils.ErrTicketNotFound):

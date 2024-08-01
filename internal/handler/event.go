@@ -3,7 +3,6 @@ package handler
 import (
 	"errors"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/nadiannis/evento-api-fr/internal/domain/response"
@@ -38,14 +37,13 @@ func (h *EventHandler) GetAll(c *gin.Context) {
 }
 
 func (h *EventHandler) GetByID(c *gin.Context) {
-	id := c.Param("id")
-	customerID, err := strconv.ParseInt(id, 10, 64)
+	id, err := utils.ReadIDParam(c)
 	if err != nil {
 		utils.BadRequestResponse(c, utils.ErrInvalidID)
 		return
 	}
 
-	event, err := h.usecase.GetByID(customerID)
+	event, err := h.usecase.GetByID(id)
 	if err != nil {
 		switch {
 		case errors.Is(err, utils.ErrEventNotFound):
