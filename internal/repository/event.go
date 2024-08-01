@@ -112,7 +112,3 @@ func (r *EventRepository) GetByID(eventID int64) (*domain.Event, error) {
 
 	return &event, nil
 }
-
-func (r *EventRepository) AddTicket(eventID int64, ticket *domain.Ticket) (*domain.Ticket, error) {
-	return nil, nil
-}

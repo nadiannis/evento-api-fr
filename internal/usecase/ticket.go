@@ -46,11 +46,6 @@ func (u *TicketUsecase) Add(input *request.TicketRequest) (*domain.Ticket, error
 		return nil, err
 	}
 
-	_, err = u.eventRepository.AddTicket(ticket.EventID, ticket)
-	if err != nil {
-		return nil, err
-	}
-
 	return ticket, nil
 }
 

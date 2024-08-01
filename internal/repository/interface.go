@@ -11,8 +11,6 @@ type CustomerWriter interface {
 	Add(customer *domain.Customer) error
 	AddBalance(customerID int64, amount float64) (*domain.Customer, error)
 	DeductBalance(customerID int64, amount float64) error
-	AddOrder(customerID int64, order *domain.Order) error
-	DeleteAllOrders()
 }
 
 type ICustomerRepository interface {
@@ -27,7 +25,6 @@ type EventReader interface {
 
 type EventWriter interface {
 	Add(event *domain.Event) error
-	AddTicket(eventID int64, ticket *domain.Ticket) (*domain.Ticket, error)
 }
 
 type IEventRepository interface {

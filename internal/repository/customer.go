@@ -123,13 +123,6 @@ func (r *CustomerRepository) GetByID(customerID int64) (*domain.Customer, error)
 	return &customer, nil
 }
 
-func (r *CustomerRepository) AddOrder(customerID int64, order *domain.Order) error {
-	return nil
-}
-
-func (r *CustomerRepository) DeleteAllOrders() {
-}
-
 func (r *CustomerRepository) AddBalance(customerID int64, amount float64) (*domain.Customer, error) {
 	query := `
 		UPDATE customers
