@@ -13,7 +13,7 @@ type CustomerReader interface {
 
 type CustomerWriter interface {
 	Add(input *request.CustomerRequest) (*domain.Customer, error)
-	AddBalance(customerID int64, input *request.CustomerBalanceRequest) (*domain.Customer, error)
+	UpdateBalance(customerID int64, input *request.CustomerBalanceRequest) (*domain.Customer, error)
 }
 
 type ICustomerUsecase interface {

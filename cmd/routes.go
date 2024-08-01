@@ -22,7 +22,7 @@ func (app *application) routes() *gin.Engine {
 	r.GET("/api/customers", app.handlers.Customers.GetAll)
 	r.POST("/api/customers", app.handlers.Customers.Add)
 	r.GET("/api/customers/:id", app.handlers.Customers.GetByID)
-	r.PATCH("/api/customers/:id/balances", app.handlers.Customers.AddBalance)
+	r.PATCH("/api/customers/:id/balances", app.handlers.Customers.UpdateBalance)
 
 	r.GET("/api/events", app.handlers.Events.GetAll)
 	r.GET("/api/events/:id", app.handlers.Events.GetByID)

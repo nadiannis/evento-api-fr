@@ -10,7 +10,7 @@ type CustomerReader interface {
 type CustomerWriter interface {
 	Add(customer *domain.Customer) error
 	AddBalance(customerID int64, amount float64) (*domain.Customer, error)
-	DeductBalance(customerID int64, amount float64) error
+	DeductBalance(customerID int64, amount float64) (*domain.Customer, error)
 }
 
 type ICustomerRepository interface {

@@ -6,5 +6,6 @@ type CustomerRequest struct {
 }
 
 type CustomerBalanceRequest struct {
-	Balance float64 `json:"balance"`
+	Action  UpdateNumberAction `json:"action"`
+	Balance float64            `json:"balance"`
 }

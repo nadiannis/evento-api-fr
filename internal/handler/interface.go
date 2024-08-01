@@ -11,7 +11,7 @@ type CustomerReader interface {
 
 type CustomerWriter interface {
 	Add(c *gin.Context)
-	AddBalance(c *gin.Context)
+	UpdateBalance(c *gin.Context)
 }
 
 type ICustomerHandler interface {

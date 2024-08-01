@@ -50,7 +50,7 @@ func (u *OrderUsecase) Add(input *request.OrderRequest) (*domain.Order, error) {
 	}
 
 	totalPrice := float64(input.Quantity) * ticketDetail.Type.Price
-	err = u.customerRepository.DeductBalance(customer.ID, totalPrice)
+	_, err = u.customerRepository.DeductBalance(customer.ID, totalPrice)
 	if err != nil {
 		u.ticketRepository.AddQuantity(ticketDetail.ID, input.Quantity)
 

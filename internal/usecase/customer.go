@@ -5,6 +5,7 @@ import (
 	"github.com/nadiannis/evento-api-fr/internal/domain/request"
 	"github.com/nadiannis/evento-api-fr/internal/domain/response"
 	"github.com/nadiannis/evento-api-fr/internal/repository"
+	"github.com/nadiannis/evento-api-fr/internal/utils"
 )
 
 type CustomerUsecase struct {
@@ -80,16 +81,22 @@ func (u *CustomerUsecase) GetByID(customerID int64) (*response.CustomerResponse,
 	return customerResponse, nil
 }
 
-func (u *CustomerUsecase) AddBalance(customerID int64, input *request.CustomerBalanceRequest) (*domain.Customer, error) {
+func (u *CustomerUsecase) UpdateBalance(customerID int64, input *request.CustomerBalanceRequest) (*domain.Customer, error) {
 	_, err := u.customerRepository.GetByID(customerID)
 	if err != nil {
 		return nil, err
 	}
 
-	customer, err := u.customerRepository.AddBalance(customerID, input.Balance)
-	if err != nil {
-		return nil, err
+	var customer *domain.Customer
+
+	switch input.Action {
+	case request.ActionAdd:
+		customer, err = u.customerRepository.AddBalance(customerID, input.Balance)
+	case request.ActionDeduct:
+		customer, err = u.customerRepository.DeductBalance(customerID, input.Balance)
+	default:
+		return nil, utils.ErrInvalidAction
 	}
 
-	return customer, nil
+	return customer, err
 }

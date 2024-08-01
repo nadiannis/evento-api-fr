@@ -106,7 +106,7 @@ func (h *CustomerHandler) GetByID(c *gin.Context) {
 	utils.WriteJSON(c, http.StatusOK, res)
 }
 
-func (h *CustomerHandler) AddBalance(c *gin.Context) {
+func (h *CustomerHandler) UpdateBalance(c *gin.Context) {
 	id, err := utils.ReadIDParam(c)
 	if err != nil {
 		utils.BadRequestResponse(c, utils.ErrInvalidID)
@@ -123,6 +123,8 @@ func (h *CustomerHandler) AddBalance(c *gin.Context) {
 
 	v := utils.NewValidator()
 
+	v.Check(input.Action != "", "action", "action is required")
+	v.Check(utils.PermittedValue(input.Action, request.ActionAdd, request.ActionDeduct), "action", "action should be 'add' or 'deduct'")
 	v.Check(input.Balance != 0, "balance", "balance is required")
 	v.Check(input.Balance > 0, "balance", "balance should not be a negative number")
 
@@ -131,11 +133,13 @@ func (h *CustomerHandler) AddBalance(c *gin.Context) {
 		return
 	}
 
-	customer, err := h.usecase.AddBalance(id, &input)
+	customer, err := h.usecase.UpdateBalance(id, &input)
 	if err != nil {
 		switch {
 		case errors.Is(err, utils.ErrCustomerNotFound):
 			utils.NotFoundResponse(c, err)
+		case errors.Is(err, utils.ErrInsufficientBalance):
+			utils.BadRequestResponse(c, err)
 		default:
 			utils.ServerErrorResponse(c, err)
 		}
@@ -144,7 +148,7 @@ func (h *CustomerHandler) AddBalance(c *gin.Context) {
 
 	res := response.SuccessResponse{
 		Status:  response.Success,
-		Message: "customer balance added successfully",
+		Message: "customer balance updated successfully",
 		Data:    customer,
 	}
 

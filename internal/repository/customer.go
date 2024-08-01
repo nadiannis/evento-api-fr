@@ -155,7 +155,7 @@ func (r *CustomerRepository) AddBalance(customerID int64, amount float64) (*doma
 	return &customer, nil
 }
 
-func (r *CustomerRepository) DeductBalance(customerID int64, amount float64) error {
+func (r *CustomerRepository) DeductBalance(customerID int64, amount float64) (*domain.Customer, error) {
 	query := `
 		UPDATE customers
 		SET balance = balance - $1
@@ -164,33 +164,30 @@ func (r *CustomerRepository) DeductBalance(customerID int64, amount float64) err
 	`
 	args := []any{amount, customerID}
 
+	var customer domain.Customer
+
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer stmt.Close()
 
-	result, err := stmt.ExecContext(ctx, args...)
+	err = stmt.QueryRowContext(ctx, args...).Scan(
+		&customer.ID,
+		&customer.Username,
+		&customer.Balance,
+	)
 	if err != nil {
 		switch {
 		case err.Error() == `ERROR: new row for relation "customers" violates check constraint "customers_balance_check" (SQLSTATE 23514)`:
-			return utils.ErrInsufficientBalance
+			return nil, utils.ErrInsufficientBalance
 		default:
-			return err
+			return nil, err
 		}
 	}
 
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-
-	if rowsAffected == 0 {
-		return utils.ErrCustomerNotFound
-	}
-
-	return nil
+	return &customer, nil
 }

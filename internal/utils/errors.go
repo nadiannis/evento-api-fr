@@ -23,6 +23,7 @@ var (
 	ErrInsufficientTicketQuantity = errors.New("insufficient ticket quantity")
 	ErrInsufficientBalance        = errors.New("insufficient balance")
 	ErrInvalidID                  = errors.New("invalid id")
+	ErrInvalidAction              = errors.New("invalid action")
 )
 
 func errorResponse(c *gin.Context, status int, message any) {
