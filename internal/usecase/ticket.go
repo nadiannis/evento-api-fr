@@ -4,32 +4,44 @@ import (
 	"github.com/nadiannis/evento-api-fr/internal/domain"
 	"github.com/nadiannis/evento-api-fr/internal/domain/request"
 	"github.com/nadiannis/evento-api-fr/internal/repository"
+	"github.com/nadiannis/evento-api-fr/internal/utils"
 )
 
 type TicketUsecase struct {
-	ticketRepository repository.ITicketRepository
-	eventRepository  repository.IEventRepository
+	ticketRepository     repository.ITicketRepository
+	ticketTypeRepository repository.ITicketTypeRepository
+	eventRepository      repository.IEventRepository
 }
 
-func NewTicketUsecase(ticketRepository repository.ITicketRepository, eventRepository repository.IEventRepository) ITicketUsecase {
+func NewTicketUsecase(
+	ticketRepository repository.ITicketRepository,
+	ticketTypeRepository repository.ITicketTypeRepository,
+	eventRepository repository.IEventRepository,
+) ITicketUsecase {
 	return &TicketUsecase{
-		ticketRepository: ticketRepository,
-		eventRepository:  eventRepository,
+		ticketRepository:     ticketRepository,
+		ticketTypeRepository: ticketTypeRepository,
+		eventRepository:      eventRepository,
 	}
 }
 
-func (u *TicketUsecase) GetAll() ([]*domain.Ticket, error) {
+func (u *TicketUsecase) GetAll() ([]*domain.TicketDetail, error) {
 	return u.ticketRepository.GetAll()
 }
 
 func (u *TicketUsecase) Add(input *request.TicketRequest) (*domain.Ticket, error) {
-	ticket := &domain.Ticket{
-		EventID:  input.EventID,
-		Type:     input.Type,
-		Quantity: input.Quantity,
+	ticketType, err := u.ticketTypeRepository.GetByName(input.Type)
+	if err != nil {
+		return nil, utils.ErrTicketTypeNotFound
 	}
 
-	err := u.ticketRepository.Add(ticket)
+	ticket := &domain.Ticket{
+		EventID:      input.EventID,
+		TicketTypeID: ticketType.ID,
+		Quantity:     input.Quantity,
+	}
+
+	err = u.ticketRepository.Add(ticket)
 	if err != nil {
 		return nil, err
 	}
@@ -42,13 +54,13 @@ func (u *TicketUsecase) Add(input *request.TicketRequest) (*domain.Ticket, error
 	return ticket, nil
 }
 
-func (u *TicketUsecase) GetByID(ticketID int64) (*domain.Ticket, error) {
-	ticket, err := u.ticketRepository.GetByID(ticketID)
+func (u *TicketUsecase) GetByID(ticketID int64) (*domain.TicketDetail, error) {
+	ticketDetail, err := u.ticketRepository.GetByID(ticketID)
 	if err != nil {
 		return nil, err
 	}
 
-	return ticket, nil
+	return ticketDetail, nil
 }
 
 func (u *TicketUsecase) AddQuantity(ticketID int64, input *request.TicketQuantityRequest) (*domain.Ticket, error) {

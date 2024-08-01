@@ -20,8 +20,12 @@ func NewTicketRepository(db *sql.DB) ITicketRepository {
 	}
 }
 
-func (r *TicketRepository) GetAll() ([]*domain.Ticket, error) {
-	query := "SELECT id, event_id, type, quantity FROM tickets"
+func (r *TicketRepository) GetAll() ([]*domain.TicketDetail, error) {
+	query := `
+		SELECT T.id, T.event_id, T.quantity, TT.id AS type_id, TT.name AS type_name, TT.price AS type_price
+		FROM tickets T
+		JOIN ticket_types TT ON T.ticket_type_id = TT.id
+	`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -38,34 +42,41 @@ func (r *TicketRepository) GetAll() ([]*domain.Ticket, error) {
 	}
 	defer rows.Close()
 
-	tickets := make([]*domain.Ticket, 0)
+	ticketDetails := make([]*domain.TicketDetail, 0)
 	for rows.Next() {
-		var ticket domain.Ticket
+		var ticketDetail domain.TicketDetail
 
-		err := rows.Scan(&ticket.ID, &ticket.EventID, &ticket.Type, &ticket.Quantity)
+		err := rows.Scan(
+			&ticketDetail.ID,
+			&ticketDetail.EventID,
+			&ticketDetail.Quantity,
+			&ticketDetail.Type.ID,
+			&ticketDetail.Type.Name,
+			&ticketDetail.Type.Price,
+		)
 		if err != nil {
 			return nil, err
 		}
 
-		tickets = append(tickets, &ticket)
+		ticketDetails = append(ticketDetails, &ticketDetail)
 	}
 
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
 
-	return tickets, nil
+	return ticketDetails, nil
 }
 
 func (r *TicketRepository) Add(ticket *domain.Ticket) error {
 	query := `
-		SELECT EXISTS(
+		SELECT EXISTS (
 			SELECT 1
 			FROM tickets
-			WHERE event_id = $1 AND type = $2
+			WHERE event_id = $1 AND ticket_type_id = $2
 		)
 	`
-	args := []any{ticket.EventID, ticket.Type}
+	args := []any{ticket.EventID, ticket.TicketTypeID}
 
 	var exists bool
 
@@ -94,11 +105,11 @@ func (r *TicketRepository) Add(ticket *domain.Ticket) error {
 	}
 
 	query = `
-		INSERT INTO tickets (event_id, type, quantity)
+		INSERT INTO tickets (event_id, ticket_type_id, quantity)
 		VALUES ($1, $2, $3)
 		RETURNING id
 	`
-	args = []any{ticket.EventID, ticket.Type, ticket.Quantity}
+	args = []any{ticket.EventID, ticket.TicketTypeID, ticket.Quantity}
 
 	insertStmt, err := tx.PrepareContext(ctx, query)
 	if err != nil {
@@ -118,14 +129,15 @@ func (r *TicketRepository) Add(ticket *domain.Ticket) error {
 	return nil
 }
 
-func (r *TicketRepository) GetByID(ticketID int64) (*domain.Ticket, error) {
+func (r *TicketRepository) GetByID(ticketID int64) (*domain.TicketDetail, error) {
 	query := `
-		SELECT id, event_id, type, quantity
-		FROM tickets
-		WHERE id = $1
+		SELECT T.id, T.event_id, T.quantity, TT.id AS type_id, TT.name AS type_name, TT.price AS type_price
+		FROM tickets T
+		JOIN ticket_types TT ON T.ticket_type_id = TT.id 
+		WHERE T.id = $1
 	`
 
-	var ticket domain.Ticket
+	var ticketDetail domain.TicketDetail
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -137,10 +149,12 @@ func (r *TicketRepository) GetByID(ticketID int64) (*domain.Ticket, error) {
 	defer stmt.Close()
 
 	err = stmt.QueryRowContext(ctx, ticketID).Scan(
-		&ticket.ID,
-		&ticket.EventID,
-		&ticket.Type,
-		&ticket.Quantity,
+		&ticketDetail.ID,
+		&ticketDetail.EventID,
+		&ticketDetail.Quantity,
+		&ticketDetail.Type.ID,
+		&ticketDetail.Type.Name,
+		&ticketDetail.Type.Price,
 	)
 
 	if err != nil {
@@ -152,14 +166,15 @@ func (r *TicketRepository) GetByID(ticketID int64) (*domain.Ticket, error) {
 		}
 	}
 
-	return &ticket, nil
+	return &ticketDetail, nil
 }
 
-func (r *TicketRepository) GetByEventID(eventID int64) ([]*domain.Ticket, error) {
+func (r *TicketRepository) GetByEventID(eventID int64) ([]*domain.TicketDetail, error) {
 	query := `
-		SELECT id, event_id, type, quantity
-		FROM tickets
-		WHERE event_id = $1
+		SELECT T.id, T.event_id, T.quantity, TT.id AS type_id, TT.name AS type_name, TT.price AS type_price
+		FROM tickets T
+		JOIN ticket_types TT ON T.ticket_type_id = TT.id 
+		WHERE T.event_id = $1
 	`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -177,23 +192,30 @@ func (r *TicketRepository) GetByEventID(eventID int64) ([]*domain.Ticket, error)
 	}
 	defer rows.Close()
 
-	tickets := make([]*domain.Ticket, 0)
+	ticketDetails := make([]*domain.TicketDetail, 0)
 	for rows.Next() {
-		var ticket domain.Ticket
+		var ticketDetail domain.TicketDetail
 
-		err := rows.Scan(&ticket.ID, &ticket.EventID, &ticket.Type, &ticket.Quantity)
+		err := rows.Scan(
+			&ticketDetail.ID,
+			&ticketDetail.EventID,
+			&ticketDetail.Quantity,
+			&ticketDetail.Type.ID,
+			&ticketDetail.Type.Name,
+			&ticketDetail.Type.Price,
+		)
 		if err != nil {
 			return nil, err
 		}
 
-		tickets = append(tickets, &ticket)
+		ticketDetails = append(ticketDetails, &ticketDetail)
 	}
 
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 
-	return tickets, nil
+	return ticketDetails, nil
 }
 
 func (r *TicketRepository) AddQuantity(ticketID int64, quantity int) (*domain.Ticket, error) {
@@ -201,7 +223,7 @@ func (r *TicketRepository) AddQuantity(ticketID int64, quantity int) (*domain.Ti
 		UPDATE tickets
 		SET quantity = quantity + $1
 		WHERE id = $2
-		RETURNING id, event_id, type, quantity
+		RETURNING id, event_id, ticket_type_id, quantity
 	`
 
 	var ticket domain.Ticket
@@ -218,7 +240,7 @@ func (r *TicketRepository) AddQuantity(ticketID int64, quantity int) (*domain.Ti
 	err = stmt.QueryRowContext(ctx, quantity, ticketID).Scan(
 		&ticket.ID,
 		&ticket.EventID,
-		&ticket.Type,
+		&ticket.TicketTypeID,
 		&ticket.Quantity,
 	)
 

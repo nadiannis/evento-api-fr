@@ -39,32 +39,27 @@ func (u *OrderUsecase) Add(input *request.OrderRequest) (*domain.Order, error) {
 		return nil, err
 	}
 
-	ticket, err := u.ticketRepository.GetByID(input.TicketID)
+	ticketDetail, err := u.ticketRepository.GetByID(input.TicketID)
 	if err != nil {
 		return nil, err
 	}
 
-	ticketType, err := u.ticketTypeRepository.GetByName(ticket.Type)
+	err = u.ticketRepository.DeductQuantity(ticketDetail.ID, input.Quantity)
 	if err != nil {
 		return nil, err
 	}
 
-	err = u.ticketRepository.DeductQuantity(ticket.ID, input.Quantity)
-	if err != nil {
-		return nil, err
-	}
-
-	totalPrice := float64(input.Quantity) * ticketType.Price
+	totalPrice := float64(input.Quantity) * ticketDetail.Type.Price
 	err = u.customerRepository.DeductBalance(customer.ID, totalPrice)
 	if err != nil {
-		u.ticketRepository.AddQuantity(ticket.ID, input.Quantity)
+		u.ticketRepository.AddQuantity(ticketDetail.ID, input.Quantity)
 
 		return nil, err
 	}
 
 	order := &domain.Order{
 		CustomerID: customer.ID,
-		TicketID:   ticket.ID,
+		TicketID:   ticketDetail.ID,
 		Quantity:   input.Quantity,
 		TotalPrice: totalPrice,
 		CreatedAt:  time.Now(),

@@ -50,9 +50,9 @@ type ITicketTypeRepository interface {
 }
 
 type TicketReader interface {
-	GetAll() ([]*domain.Ticket, error)
-	GetByID(ticketID int64) (*domain.Ticket, error)
-	GetByEventID(eventID int64) ([]*domain.Ticket, error)
+	GetAll() ([]*domain.TicketDetail, error)
+	GetByID(ticketID int64) (*domain.TicketDetail, error)
+	GetByEventID(eventID int64) ([]*domain.TicketDetail, error)
 }
 
 type TicketWriter interface {

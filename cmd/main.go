@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"flag"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/nadiannis/evento-api-fr/internal/handler"
@@ -24,10 +25,13 @@ type application struct {
 }
 
 func main() {
-	cfg := config{}
-	cfg.port = 8080
-	cfg.db.driver = "pgx"
-	cfg.db.dsn = "postgres://postgres:pass1234@localhost:5432/evento"
+	var cfg config
+
+	flag.IntVar(&cfg.port, "port", 8080, "API server port")
+	flag.StringVar(&cfg.db.driver, "db-driver", "pgx", "PostgreSQL driver")
+	flag.StringVar(&cfg.db.dsn, "db-dsn", "postgres://postgres:pass1234@localhost:5432/evento", "PostgreSQL data source name")
+
+	flag.Parse()
 
 	db, err := openDB(cfg)
 	if err != nil {
@@ -58,7 +62,7 @@ func main() {
 }
 
 func openDB(cfg config) (*sql.DB, error) {
-	db, err := sql.Open("pgx", cfg.db.dsn)
+	db, err := sql.Open(cfg.db.driver, cfg.db.dsn)
 	if err != nil {
 		return nil, err
 	}
