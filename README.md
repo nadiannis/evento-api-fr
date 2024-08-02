@@ -10,6 +10,7 @@
 - [Description](#description)
 - [Features](#features)
 - [Entities](#entities)
+- [Database Schema](#database-schema)
 - [API Endpoints](#api-endpoints)
 - [Tech Stack](#tech-stack)
 - [Run Locally](#run-locally)
