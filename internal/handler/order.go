@@ -81,7 +81,11 @@ func (h *OrderHandler) Add(c *gin.Context) {
 }
 
 func (h *OrderHandler) DeleteAll(c *gin.Context) {
-	h.usecase.DeleteAll()
+	err := h.usecase.DeleteAll()
+	if err != nil {
+		utils.ServerErrorResponse(c, err)
+		return
+	}
 
 	res := response.SuccessResponse{
 		Status:  response.Success,

@@ -130,9 +130,22 @@ func (r *OrderRepository) GetByCustomerID(customerID int64) ([]*domain.Order, er
 	return orders, nil
 }
 
-func (r *OrderRepository) DeleteByID(orderID int64) error {
-	return nil
-}
+func (r *OrderRepository) DeleteAll() error {
+	query := "DELETE FROM orders"
 
-func (r *OrderRepository) DeleteAll() {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	stmt, err := r.db.PrepareContext(ctx, query)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.ExecContext(ctx)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

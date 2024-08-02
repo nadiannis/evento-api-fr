@@ -55,6 +55,8 @@ func main() {
 	log.Info().Msg("add events and tickets")
 	prepopulateEventsAndTickets(usecases.Events, usecases.Tickets)
 
+	// ConcurrentOrderCreation(usecases.Orders, usecases.Tickets)
+
 	err = app.serve()
 	if err != nil {
 		log.Fatal().Msg(err.Error())
@@ -66,6 +68,8 @@ func openDB(cfg config) (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	db.SetMaxOpenConns(25)
 
 	err = db.Ping()
 	if err != nil {

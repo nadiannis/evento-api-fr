@@ -69,7 +69,7 @@ type OrderReader interface {
 
 type OrderWriter interface {
 	Add(input *request.OrderRequest) (*domain.Order, error)
-	DeleteAll()
+	DeleteAll() error
 }
 
 type IOrderUsecase interface {
