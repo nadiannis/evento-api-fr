@@ -9,9 +9,10 @@ import (
 )
 
 func (app *application) routes() *gin.Engine {
-	r := gin.Default()
+	r := gin.New()
 
 	r.Use(requestLogger())
+	r.Use(gin.Recovery())
 
 	r.GET("/api", func(c *gin.Context) {
 		message := fmt.Sprintf("API is running on port %d", app.config.port)
