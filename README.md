@@ -148,7 +148,31 @@ erDiagram
 
 [`^ back to top ^`](#table-of-contents)
 
-- Make sure you have [Go](https://go.dev) installed on your computer.
+- Make sure you have [Go 1.22](https://go.dev), [PostgreSQL](https://www.postgresql.org), [migrate](https://github.com/golang-migrate/migrate) installed on your computer. Run these commands to check whether the tools are already installed. The terminal will output the version number if it is installed.
+
+  ```bash
+  go version
+  ```
+
+  ```bash
+  psql --version
+  ```
+
+  ```bash
+  migrate -version
+  ```
+
+- Connect to the PostgreSQL server by providing a user name & password.
+
+  ```bash
+  psql -U root
+  ```
+
+  Then create a database. You can name it as `evento`.
+
+  ```sql
+  CREATE DATABASE evento;
+  ```
 
 - Clone the repo.
 
@@ -164,6 +188,12 @@ erDiagram
 
   ```bash
   go mod tidy
+  ```
+
+- Apply migrations.
+
+  ```bash
+  migrate -path ./migrations -database pgx://postgres:pass1234@localhost:5432/evento up
   ```
 
 - Run the server. The web server will run on port 8080.
