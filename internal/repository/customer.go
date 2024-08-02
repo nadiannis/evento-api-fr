@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"sync"
 	"time"
 
 	"github.com/nadiannis/evento-api-fr/internal/domain"
@@ -12,6 +13,7 @@ import (
 
 type CustomerRepository struct {
 	db *sql.DB
+	mu sync.Mutex
 }
 
 func NewCustomerRepository(db *sql.DB) ICustomerRepository {
@@ -21,6 +23,9 @@ func NewCustomerRepository(db *sql.DB) ICustomerRepository {
 }
 
 func (r *CustomerRepository) GetAll() ([]*domain.Customer, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	query := "SELECT id, username, balance FROM customers"
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -58,6 +63,9 @@ func (r *CustomerRepository) GetAll() ([]*domain.Customer, error) {
 }
 
 func (r *CustomerRepository) Add(customer *domain.Customer) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	query := `
 		INSERT INTO customers (username, balance)
 		VALUES ($1, $2)
@@ -88,6 +96,9 @@ func (r *CustomerRepository) Add(customer *domain.Customer) error {
 }
 
 func (r *CustomerRepository) GetByID(customerID int64) (*domain.Customer, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	query := `
 		SELECT id, username, balance 
 		FROM customers 
@@ -124,6 +135,9 @@ func (r *CustomerRepository) GetByID(customerID int64) (*domain.Customer, error)
 }
 
 func (r *CustomerRepository) AddBalance(customerID int64, amount float64) (*domain.Customer, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	query := `
 		UPDATE customers
 		SET balance = balance + $1
@@ -156,6 +170,9 @@ func (r *CustomerRepository) AddBalance(customerID int64, amount float64) (*doma
 }
 
 func (r *CustomerRepository) DeductBalance(customerID int64, amount float64) (*domain.Customer, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	query := `
 		UPDATE customers
 		SET balance = balance - $1

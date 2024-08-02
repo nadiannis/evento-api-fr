@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"sync"
 	"time"
 
 	"github.com/nadiannis/evento-api-fr/internal/domain"
@@ -12,6 +13,7 @@ import (
 
 type EventRepository struct {
 	db *sql.DB
+	mu sync.Mutex
 }
 
 func NewEventRepository(db *sql.DB) IEventRepository {
@@ -21,6 +23,9 @@ func NewEventRepository(db *sql.DB) IEventRepository {
 }
 
 func (r *EventRepository) GetAll() ([]*domain.Event, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	query := "SELECT id, name, date FROM events"
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -58,6 +63,9 @@ func (r *EventRepository) GetAll() ([]*domain.Event, error) {
 }
 
 func (r *EventRepository) Add(event *domain.Event) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	query := `
 		INSERT INTO events (name, date)
 		VALUES ($1, $2)
@@ -78,6 +86,9 @@ func (r *EventRepository) Add(event *domain.Event) error {
 }
 
 func (r *EventRepository) GetByID(eventID int64) (*domain.Event, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	query := `
 		SELECT id, name, date
 		FROM events

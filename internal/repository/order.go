@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"sync"
 	"time"
 
 	"github.com/nadiannis/evento-api-fr/internal/domain"
@@ -10,6 +11,7 @@ import (
 
 type OrderRepository struct {
 	db *sql.DB
+	mu sync.Mutex
 }
 
 func NewOrderRepository(db *sql.DB) IOrderRepository {
@@ -19,6 +21,9 @@ func NewOrderRepository(db *sql.DB) IOrderRepository {
 }
 
 func (r *OrderRepository) GetAll() ([]*domain.Order, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	query := "SELECT id, customer_id, ticket_id, quantity, total_price, created_at FROM orders"
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -63,6 +68,9 @@ func (r *OrderRepository) GetAll() ([]*domain.Order, error) {
 }
 
 func (r *OrderRepository) Add(order *domain.Order) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	query := `
 	INSERT INTO orders (customer_id, ticket_id, quantity, total_price, created_at)
 	VALUES ($1, $2, $3, $4, $5)
@@ -83,6 +91,9 @@ func (r *OrderRepository) Add(order *domain.Order) error {
 }
 
 func (r *OrderRepository) GetByCustomerID(customerID int64) ([]*domain.Order, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	query := `
 		SELECT id, customer_id, ticket_id, quantity, total_price, created_at
 		FROM orders
@@ -131,6 +142,9 @@ func (r *OrderRepository) GetByCustomerID(customerID int64) ([]*domain.Order, er
 }
 
 func (r *OrderRepository) DeleteAll() error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	query := "DELETE FROM orders"
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)

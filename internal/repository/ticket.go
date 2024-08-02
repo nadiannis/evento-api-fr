@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"sync"
 	"time"
 
 	"github.com/nadiannis/evento-api-fr/internal/domain"
@@ -12,6 +13,7 @@ import (
 
 type TicketRepository struct {
 	db *sql.DB
+	mu sync.Mutex
 }
 
 func NewTicketRepository(db *sql.DB) ITicketRepository {
@@ -21,6 +23,9 @@ func NewTicketRepository(db *sql.DB) ITicketRepository {
 }
 
 func (r *TicketRepository) GetAll() ([]*domain.TicketDetail, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	query := `
 		SELECT T.id, T.event_id, T.quantity, TT.id AS type_id, TT.name AS type_name, TT.price AS type_price
 		FROM tickets T
@@ -69,6 +74,9 @@ func (r *TicketRepository) GetAll() ([]*domain.TicketDetail, error) {
 }
 
 func (r *TicketRepository) Add(ticket *domain.Ticket) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	query := `
 		SELECT EXISTS (
 			SELECT 1
@@ -130,6 +138,9 @@ func (r *TicketRepository) Add(ticket *domain.Ticket) error {
 }
 
 func (r *TicketRepository) GetByID(ticketID int64) (*domain.TicketDetail, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	query := `
 		SELECT T.id, T.event_id, T.quantity, TT.id AS type_id, TT.name AS type_name, TT.price AS type_price
 		FROM tickets T
@@ -170,6 +181,9 @@ func (r *TicketRepository) GetByID(ticketID int64) (*domain.TicketDetail, error)
 }
 
 func (r *TicketRepository) GetByEventID(eventID int64) ([]*domain.TicketDetail, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	query := `
 		SELECT T.id, T.event_id, T.quantity, TT.id AS type_id, TT.name AS type_name, TT.price AS type_price
 		FROM tickets T
@@ -219,6 +233,9 @@ func (r *TicketRepository) GetByEventID(eventID int64) ([]*domain.TicketDetail, 
 }
 
 func (r *TicketRepository) AddQuantity(ticketID int64, quantity int) (*domain.Ticket, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	query := `
 		UPDATE tickets
 		SET quantity = quantity + $1
@@ -252,6 +269,9 @@ func (r *TicketRepository) AddQuantity(ticketID int64, quantity int) (*domain.Ti
 }
 
 func (r *TicketRepository) DeductQuantity(ticketID int64, quantity int) (*domain.Ticket, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	query := `
 		UPDATE tickets
 		SET quantity = quantity - $1

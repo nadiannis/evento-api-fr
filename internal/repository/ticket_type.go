@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"sync"
 	"time"
 
 	"github.com/nadiannis/evento-api-fr/internal/domain"
@@ -11,6 +12,7 @@ import (
 
 type TicketTypeRepository struct {
 	db *sql.DB
+	mu sync.Mutex
 }
 
 func NewTicketTypeRepository(db *sql.DB) ITicketTypeRepository {
@@ -20,6 +22,9 @@ func NewTicketTypeRepository(db *sql.DB) ITicketTypeRepository {
 }
 
 func (r *TicketTypeRepository) GetAll() ([]*domain.TicketType, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	query := "SELECT id, name, price FROM ticket_types"
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -57,6 +62,9 @@ func (r *TicketTypeRepository) GetAll() ([]*domain.TicketType, error) {
 }
 
 func (r *TicketTypeRepository) Add(ticketType *domain.TicketType) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	query := `
 		INSERT INTO ticket_types (name, price)
 		VALUES ($1, $2)
@@ -87,6 +95,9 @@ func (r *TicketTypeRepository) Add(ticketType *domain.TicketType) error {
 }
 
 func (r *TicketTypeRepository) GetByName(ticketTypeName domain.TicketTypeName) (*domain.TicketType, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	query := `
 		SELECT id, name, price
 		FROM ticket_types
