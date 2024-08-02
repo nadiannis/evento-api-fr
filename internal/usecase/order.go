@@ -67,6 +67,9 @@ func (u *OrderUsecase) Add(input *request.OrderRequest) (*domain.Order, error) {
 
 	err = u.orderRepository.Add(order)
 	if err != nil {
+		u.ticketRepository.AddQuantity(ticketDetail.ID, input.Quantity)
+		u.customerRepository.AddBalance(customer.ID, totalPrice)
+
 		return nil, err
 	}
 
