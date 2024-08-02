@@ -11,6 +11,7 @@
 - [Features](#features)
 - [Entities](#entities)
 - [API Endpoints](#api-endpoints)
+- [Tech Stack](#tech-stack)
 - [Run Locally](#run-locally)
 - [Screenshots](#screenshots)
 
@@ -18,7 +19,7 @@
 
 [`^ back to top ^`](#table-of-contents)
 
-**Evento** is a simple REST API for ordering event tickets online. This API is written in Go. It is created as a submission for the second-week exam in the Go phase of the Backend Development Training.
+**Evento** is a simple REST API for ordering event tickets online. This API is written in Go. It is created as a submission for the third-week exam in the Go phase of the Backend Development Training.
 
 ## Features
 
@@ -27,7 +28,7 @@
 - View list of customers & their orders.
 - Add a new customer.
 - View a customer.
-- Add balance amount.
+- Change balance amount.
 - View list of events with the tickets available.
 - View an event with the tickets available.
 - View list of tickets.
@@ -43,39 +44,78 @@ There are 5 entities: **Customer**, **TicketType**, **Event**, **Ticket**, & **O
 
 **Customer**
 
-- id: `string`
+- id: `int64`
 - username: `string`
 - balance: `float64`
-- orders: `[]*Order`
 
 **TicketType**
 
-- id: `string`
+- id: `int64`
 - name: `TicketTypeName`
 - price: `float64`
 
 **Event**
 
-- id: `string`
+- id: `int64`
 - name: `string`
 - date: `timestamp`
-- tickets: `map[TicketTypeName]*Ticket`
 
 **Ticket**
 
-- id: `string`
-- event_id `string`
-- type `TicketTypeName`
+- id: `int64`
+- event_id `int64`
+- ticket_type_id `int64`
 - quantity `int`
 
 **Order**
 
-- id: `string`
-- customer_id: `string`
-- ticket_id: `string`
+- id: `int64`
+- customer_id: `int64`
+- ticket_id: `int64`
 - quantity: `int`
 - total_price: `float64`
 - created_at: `timestamp`
+
+## Database Schema
+
+[`^ back to top ^`](#table-of-contents)
+
+```mermaid
+erDiagram
+    Customer ||--o{ Order : order
+    Customer {
+        int64 id PK
+        string username
+        float64 balance
+    }
+    Ticket }o--|| TicketType : has
+    TicketType {
+        int64 id PK
+        string name
+        float64 price
+    }
+    Event ||--|{ Ticket : has
+    Event {
+        int64 id PK
+        string name
+        datetime date
+    }
+    Order }o--|| Ticket : has
+    Ticket {
+        int64 id PK
+        int64 event_id FK
+        int64 ticket_type_id FK
+        int quantity
+    }
+    Order {
+        int64 id PK
+        int64 customer_id FK
+        int64 ticket_id FK
+        int quantity
+        float64 total_price
+        datetime created_at
+    }
+```
 
 ## API Endpoints
 
@@ -93,6 +133,15 @@ There are 5 entities: **Customer**, **TicketType**, **Event**, **Ticket**, & **O
 | GET        | /api/tickets/:id            | View a ticket.                                  |
 | GET        | /api/orders                 | View list of orders.                            |
 | POST       | /api/orders                 | Order a ticket.                                 |
+
+## Tech Stack
+
+[`^ back to top ^`](#table-of-contents)
+
+- Language: [Go 1.22](https://go.dev)
+- Web Framework: [Gin](https://gin-gonic.com)
+- DBMS: [PostgreSQL](https://www.postgresql.org)
+- Database Migration: [migrate](https://github.com/golang-migrate/migrate)
 
 ## Run Locally
 
