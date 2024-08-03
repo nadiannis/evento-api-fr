@@ -165,7 +165,7 @@ erDiagram
 - Connect to the PostgreSQL server by providing a user name & password.
 
   ```bash
-  psql -U root
+  psql -U postgres
   ```
 
   Then create a database. You can name it as `evento`.
@@ -192,40 +192,346 @@ erDiagram
 
 - Apply migrations.
 
+  Provide the DSN (data source name): `<db-driver>://<db-username>:<db-password>@localhost:5432/<db-name>`.
+
   ```bash
   migrate -path ./migrations -database pgx://postgres:pass1234@localhost:5432/evento up
   ```
 
-- Run the server. The web server will run on port 8080.
+- Run the server.
+
+  By default, the web server will run on port 8080 & the DSN is `postgres://postgres:pass1234@localhost:5432/evento`.
 
   ```bash
   go run ./cmd
+  ```
+
+  You can change the port & the DSN by running the server with flag.
+
+  This command will run the server on port 4000 & connect to the database with DSN `postgres://myusername:mypassword@localhost:5432/mydbname`.
+
+  ```bash
+  go run ./cmd -port 4000 -db-dsn postgres://myusername:mypassword@localhost:5432/mydbname
   ```
 
 ## Screenshots
 
 [`^ back to top ^`](#table-of-contents)
 
-### Add a new customer
+### `POST /api/customers` - add a new customer
 
-![Add a new customer](./docs/img/customer-add.png)
+<details>
+<summary>Request</summary>
 
-### View an event with the tickets available
+![Add a new customer (request)](./docs/img/customer-add-request.png)
 
-![View an event](./docs/img/event-get.png)
+</details>
 
-### Order a ticket (success)
+<details>
+<summary>Response</summary>
 
-![Order a ticket (success)](./docs/img/order-success.png)
+![Add a new customer (response)](./docs/img/customer-add-response.png)
 
-### Order a ticket (ticket out of stock)
+</details>
 
-![Order a ticket (ticket out of stock)](./docs/img/order-error-1.png)
+<details>
+<summary>Log</summary>
 
-### Order a ticket (insufficient balance)
+![Add a new customer (log)](./docs/img/customer-add-log.png)
 
-![Order a ticket (insufficient balance)](./docs/img/order-error-2.png)
+</details>
 
-### Log
+### `PATCH /api/customers/:id/balances` - add balance amount
 
-![Log](./docs/img/log.png)
+<details>
+<summary>Request</summary>
+
+![Add balance amount (request)](./docs/img/customer-balance-update-request.png)
+
+</details>
+
+<details>
+<summary>Response</summary>
+
+![Add balance amount (response)](./docs/img/customer-balance-update-response.png)
+
+</details>
+
+<details>
+<summary>Log</summary>
+
+![Add balance amount (log)](./docs/img/customer-balance-update-log.png)
+
+</details>
+
+### `GET /api/customers` - view list of customers & their orders
+
+<details>
+<summary>Request</summary>
+
+![View all customers (request)](./docs/img/customer-list-request.png)
+
+</details>
+
+<details>
+<summary>Response</summary>
+
+![View all customers (response)](./docs/img/customer-list-response.png)
+
+</details>
+
+<details>
+<summary>Log</summary>
+
+![View all customers (log)](./docs/img/customer-list-log.png)
+
+</details>
+
+### `GET /api/customers/:id` - view a customer
+
+<details>
+<summary>Request</summary>
+
+![View a customer (request)](./docs/img/customer-get-request.png)
+
+</details>
+
+<details>
+<summary>Response</summary>
+
+![View a customer (response)](./docs/img/customer-get-response.png)
+
+</details>
+
+<details>
+<summary>Log</summary>
+
+![View a customer (log)](./docs/img/customer-get-log.png)
+
+</details>
+
+### `GET /api/events` - view list of events with the tickets available
+
+<details>
+<summary>Request</summary>
+
+![View list of events (request)](./docs/img/event-list-request.png)
+
+</details>
+
+<details>
+<summary>Response</summary>
+
+![View list of events (response)](./docs/img/event-list-response.png)
+
+</details>
+
+<details>
+<summary>Log</summary>
+
+![View list of events (log)](./docs/img/event-list-log.png)
+
+</details>
+
+### `GET /api/events/:id` - view an event with the tickets available
+
+<details>
+<summary>Request</summary>
+
+![View an event (request)](./docs/img/event-get-request.png)
+
+</details>
+
+<details>
+<summary>Response</summary>
+
+![View an event (response)](./docs/img/event-get-response.png)
+
+</details>
+
+<details>
+<summary>Log</summary>
+
+![View an event (log)](./docs/img/event-get-log.png)
+
+</details>
+
+### `GET /api/tickets` - view list of tickets
+
+<details>
+<summary>Request</summary>
+
+![View list of tickets (request)](./docs/img/ticket-list-request.png)
+
+</details>
+
+<details>
+<summary>Response</summary>
+
+![View list of tickets (response)](./docs/img/ticket-list-response.png)
+
+</details>
+
+<details>
+<summary>Log</summary>
+
+![View list of tickets (log)](./docs/img/ticket-list-log.png)
+
+</details>
+
+### `GET /api/tickets/:id` - view a ticket
+
+<details>
+<summary>Request</summary>
+
+![View a ticket (request)](./docs/img/ticket-get-request.png)
+
+</details>
+
+<details>
+<summary>Response</summary>
+
+![View a ticket (response)](./docs/img/ticket-get-response.png)
+
+</details>
+
+<details>
+<summary>Log</summary>
+
+![View a ticket (log)](./docs/img/ticket-get-log.png)
+
+</details>
+
+### `POST /api/orders` - order a ticket (success)
+
+<details>
+<summary>Request</summary>
+
+![Order a ticket (success) (request)](./docs/img/order-success-request.png)
+
+</details>
+
+<details>
+<summary>Response</summary>
+
+![Order a ticket (success) (response)](./docs/img/order-success-response.png)
+
+</details>
+
+<details>
+<summary>Log</summary>
+
+![Order a ticket (success) (log)](./docs/img/order-success-log.png)
+
+</details>
+
+<details>
+<summary>Ticket quantity deducted</summary>
+
+![Order a ticket (success) (ticket quantity deducted)](./docs/img/order-success-ticket-deducted.png)
+
+</details>
+
+<details>
+<summary>Balance deducted</summary>
+
+![Order a ticket (success) (balance deducted)](./docs/img/order-success-balance-deducted.png)
+
+</details>
+
+### `POST /api/orders` - order a ticket (insufficient ticket quantity)
+
+<details>
+<summary>Request</summary>
+
+![Order a ticket (insufficient ticket quantity) (request)](./docs/img/order-insufficient-ticket-request.png)
+
+</details>
+
+<details>
+<summary>Response</summary>
+
+![Order a ticket (insufficient ticket quantity) (response)](./docs/img/order-insufficient-ticket-response.png)
+
+</details>
+
+<details>
+<summary>Log</summary>
+
+![Order a ticket (insufficient ticket quantity) (log)](./docs/img/order-insufficient-ticket-log.png)
+
+</details>
+
+<details>
+<summary>Ticket quantity not deducted</summary>
+
+![Order a ticket (success) (ticket quantity not deducted)](./docs/img/order-insufficient-ticket-ticket-not-deducted.png)
+
+</details>
+
+<details>
+<summary>Balance not deducted</summary>
+
+![Order a ticket (success) (balance not deducted)](./docs/img/order-insufficient-ticket-balance-not-deducted.png)
+
+</details>
+
+### `POST /api/orders` - order a ticket (insufficient balance)
+
+<details>
+<summary>Request</summary>
+
+![Order a ticket (insufficient balance) (request)](./docs/img/order-insufficient-balance-request.png)
+
+</details>
+
+<details>
+<summary>Response</summary>
+
+![Order a ticket (insufficient balance) (response)](./docs/img/order-insufficient-balance-response.png)
+
+</details>
+
+<details>
+<summary>Log</summary>
+
+![Order a ticket (insufficient balance) (log)](./docs/img/order-insufficient-balance-log.png)
+
+</details>
+
+<details>
+<summary>Ticket quantity not deducted</summary>
+
+![Order a ticket (success) (ticket quantity not deducted)](./docs/img/order-insufficient-balance-ticket-not-deducted.png)
+
+</details>
+
+<details>
+<summary>Balance not deducted</summary>
+
+![Order a ticket (success) (balance not deducted)](./docs/img/order-insufficient-balance-balance-not-deducted.png)
+
+</details>
+
+### `GET /api/orders` - view list of orders
+
+<details>
+<summary>Request</summary>
+
+![View list of orders (request)](./docs/img/order-list-request.png)
+
+</details>
+
+<details>
+<summary>Response</summary>
+
+![View list of orders (response)](./docs/img/order-list-response.png)
+
+</details>
+
+<details>
+<summary>Log</summary>
+
+![View list of orders (log)](./docs/img/order-list-log.png)
+
+</details>
