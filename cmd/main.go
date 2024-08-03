@@ -26,9 +26,9 @@ type application struct {
 
 func main() {
 	var cfg config
+	cfg.db.driver = "pgx"
 
 	flag.IntVar(&cfg.port, "port", 8080, "API server port")
-	flag.StringVar(&cfg.db.driver, "db-driver", "pgx", "PostgreSQL driver")
 	flag.StringVar(&cfg.db.dsn, "db-dsn", "postgres://postgres:pass1234@localhost:5432/evento", "PostgreSQL data source name")
 
 	flag.Parse()
