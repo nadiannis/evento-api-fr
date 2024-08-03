@@ -55,7 +55,7 @@ func main() {
 	log.Info().Msg("add events and tickets")
 	prepopulateEventsAndTickets(usecases.Events, usecases.Tickets)
 
-	// ConcurrentOrderCreation(usecases.Orders, usecases.Tickets)
+	// scripts.ConcurrentOrderCreation(usecases.Orders, usecases.Tickets)
 
 	err = app.serve()
 	if err != nil {
