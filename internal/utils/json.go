@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 
 	"github.com/gin-gonic/gin"
@@ -11,7 +13,14 @@ import (
 func ReadJSON(c *gin.Context, dst any) error {
 	err := c.BindJSON(dst)
 	if err != nil {
+		var unmarshalTypeError *json.UnmarshalTypeError
+
 		switch {
+		case errors.As(err, &unmarshalTypeError):
+			if unmarshalTypeError.Field != "" {
+				return fmt.Errorf("body contains incorrect JSON type for field %q", unmarshalTypeError.Field)
+			}
+			return fmt.Errorf("body contains incorrect JSON type (at character %d)", unmarshalTypeError.Offset)
 		case errors.Is(err, io.EOF):
 			return errors.New("body must not be empty")
 		default:
